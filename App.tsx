@@ -2,7 +2,7 @@ import React from 'react';
 import {SafeAreaView, StatusBar, useColorScheme} from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import Exercise from './src/screens/Exercise';
+import Exercise from './src/screens/Exercise/Exercise';
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';

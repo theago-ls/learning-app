@@ -1,45 +1,8 @@
 import React from 'react';
 import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
-import {colors} from '../utils';
-
-type OptionsProps = {
-  text: string;
-  isSelected: boolean;
-  disabled: boolean;
-  onTap: () => void;
-};
-
-const Option = ({text, isSelected, disabled, onTap}: OptionsProps) => {
-  const selectedStyles = [
-    {opacity: isSelected ? 0.3 : 1},
-    {opacity: isSelected ? 0 : 1},
-  ];
-
-  return (
-    <View style={selectedStyles[0]}>
-      <TouchableOpacity
-        disabled={disabled}
-        style={optionStyles.option}
-        onPress={onTap}>
-        <Text style={[optionStyles.text, selectedStyles[1]]}>{text}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const optionStyles = StyleSheet.create({
-  option: {
-    display: 'flex',
-    borderRadius: 16,
-    margin: 8,
-    padding: 16,
-    backgroundColor: colors.white,
-  },
-  text: {
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-});
+import {colors, breakPhrase} from '../../utils';
+import Answer from './Answer';
+import Option from './Options';
 
 const options = [
   {id: 0, word: 'Hause'},
@@ -90,65 +53,12 @@ const primaryWordId = 1;
 const learningWordId = 1;
 const correctWordId = 0;
 
-const breakPhrase = (
-  words: {id: number; word: string | null}[],
-  pivotId: number,
-) => {
-  const before = words
-    .slice(
-      0,
-      words.findIndex(word => word.id === pivotId),
-    )
-    .map(({word}) => word)
-    .join(' ');
-
-  const after = words
-    .filter(word => word.id > pivotId)
-    .map(word => word.word)
-    .join(' ');
-
-  const pivot = words.find(word => word.id === pivotId)?.word;
-
-  return {before, after, pivot};
-};
-
 export default function Exercise() {
   const [selected, setSelected] = React.useState<{
     id: number;
     word: string;
   } | null>(null);
   const [answer, setAnswer] = React.useState<number | null>(null);
-
-  const answerStyle = {
-    backgroundColor:
-      answer !== null
-        ? answer === correctWordId
-          ? colors.secondary
-          : colors.pink
-        : 'transparent',
-  };
-
-  const answerButtonStyle =
-    answer !== null
-      ? {
-          backgroundColor: colors.white,
-          shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 1,
-          },
-          shadowOpacity: 0.22,
-          shadowRadius: 2.22,
-          elevation: 3,
-        }
-      : null;
-
-  const answerButtonTextStyle =
-    answer !== null
-      ? {
-          color: answer === correctWordId ? colors.secondary : colors.pink,
-        }
-      : null;
 
   const {
     before: beforePrimary,
@@ -176,10 +86,10 @@ export default function Exercise() {
           <Text style={styles.learningLanguageText}>{beforeLearning}</Text>
           {selected ? (
             <TouchableOpacity
-              style={optionStyles.option}
+              style={styles.selected}
               disabled={answer !== null}
               onPress={() => setSelected(null)}>
-              <Text style={optionStyles.text}>{selected.word}</Text>
+              <Text style={styles.selectedText}>{selected.word}</Text>
             </TouchableOpacity>
           ) : (
             <Text style={styles.underline}>________</Text>
@@ -197,25 +107,15 @@ export default function Exercise() {
             />
           ))}
         </View>
-        <View style={[styles.resultContainer, answerStyle]}>
-          {answer !== null && (
-            <Text style={styles.resultText}>
-              {answer === correctWordId
-                ? 'Great job!'
-                : `Wrong! Correct answer: ${
-                    options.filter(word => word.id === correctWordId)[0].word
-                  }`}
-            </Text>
-          )}
-          <TouchableOpacity
-            style={[styles.button, answerButtonStyle]}
-            disabled={selected === null}
-            onPress={() => (selected ? setAnswer(selected.id) : null)}>
-            <Text style={[styles.buttonText, answerButtonTextStyle]}>
-              Continue
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <Answer
+          disabled={selected === null}
+          onPress={() => (selected ? setAnswer(selected.id) : null)}
+          correctWord={
+            options.filter(word => word.id === correctWordId)[0].word
+          }
+          correctWordId={correctWordId}
+          answer={answer}
+        />
       </View>
     </View>
   );
@@ -275,31 +175,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     margin: 40,
   },
-  button: {
+  selected: {
     display: 'flex',
-    padding: 18,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    width: '80%',
-    alignSelf: 'center',
+    borderRadius: 16,
+    margin: 8,
+    padding: 16,
+    backgroundColor: colors.white,
   },
-  buttonText: {
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    color: colors.white,
+  selectedText: {
     fontWeight: 'bold',
-  },
-  resultContainer: {
-    display: 'flex',
-    flex: 1,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    padding: 20,
-  },
-  resultText: {
-    color: colors.white,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    marginLeft: 40,
+    color: colors.primary,
   },
 });
