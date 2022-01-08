@@ -71,6 +71,15 @@ export default function Exercise() {
     learningWordId,
   );
 
+  const selectedAnswerStyle =
+    answer !== null
+      ? {
+          color: colors.white,
+          backgroundColor:
+            answer === correctWordId ? colors.secondary : colors.pink,
+        }
+      : {};
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -86,10 +95,12 @@ export default function Exercise() {
           <Text style={styles.learningLanguageText}>{beforeLearning}</Text>
           {selected ? (
             <TouchableOpacity
-              style={styles.selected}
+              style={[styles.selected, selectedAnswerStyle]}
               disabled={answer !== null}
               onPress={() => setSelected(null)}>
-              <Text style={styles.selectedText}>{selected.word}</Text>
+              <Text style={[styles.selectedText, selectedAnswerStyle]}>
+                {selected.word}
+              </Text>
             </TouchableOpacity>
           ) : (
             <Text style={styles.underline}>________</Text>
