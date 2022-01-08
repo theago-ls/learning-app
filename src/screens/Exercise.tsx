@@ -2,9 +2,14 @@ import React from 'react';
 import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import {colors} from '../utils';
 
-type OptionsProps = {text: string; isSelected: boolean; onTap: () => void};
+type OptionsProps = {
+  text: string;
+  isSelected: boolean;
+  disabled: boolean;
+  onTap: () => void;
+};
 
-const Option = ({text, isSelected, onTap}: OptionsProps) => {
+const Option = ({text, isSelected, disabled, onTap}: OptionsProps) => {
   const selectedStyles = [
     {opacity: isSelected ? 0.3 : 1},
     {opacity: isSelected ? 0 : 1},
@@ -12,7 +17,10 @@ const Option = ({text, isSelected, onTap}: OptionsProps) => {
 
   return (
     <View style={selectedStyles[0]}>
-      <TouchableOpacity style={optionStyles.option} onPress={onTap}>
+      <TouchableOpacity
+        disabled={disabled}
+        style={optionStyles.option}
+        onPress={onTap}>
         <Text style={[optionStyles.text, selectedStyles[1]]}>{text}</Text>
       </TouchableOpacity>
     </View>
@@ -80,6 +88,7 @@ const learningWords = [
 
 const primaryWordId = 1;
 const learningWordId = 1;
+const correctWordId = 0;
 
 const breakPhrase = (
   words: {id: number; word: string | null}[],
@@ -108,6 +117,38 @@ export default function Exercise() {
     id: number;
     word: string;
   } | null>(null);
+  const [answer, setAnswer] = React.useState<number | null>(null);
+
+  const answerStyle = {
+    backgroundColor:
+      answer !== null
+        ? answer === correctWordId
+          ? colors.secondary
+          : colors.pink
+        : 'transparent',
+  };
+
+  const answerButtonStyle =
+    answer !== null
+      ? {
+          backgroundColor: colors.white,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.22,
+          shadowRadius: 2.22,
+          elevation: 3,
+        }
+      : null;
+
+  const answerButtonTextStyle =
+    answer !== null
+      ? {
+          color: answer === correctWordId ? colors.secondary : colors.pink,
+        }
+      : null;
 
   const {
     before: beforePrimary,
@@ -136,6 +177,7 @@ export default function Exercise() {
           {selected ? (
             <TouchableOpacity
               style={optionStyles.option}
+              disabled={answer !== null}
               onPress={() => setSelected(null)}>
               <Text style={optionStyles.text}>{selected.word}</Text>
             </TouchableOpacity>
@@ -148,15 +190,32 @@ export default function Exercise() {
           {options.map(option => (
             <Option
               key={option.id}
+              disabled={answer !== null}
               text={option.word}
               isSelected={selected?.id === option.id}
               onTap={() => setSelected(option)}
             />
           ))}
         </View>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
+        <View style={[styles.resultContainer, answerStyle]}>
+          {answer !== null && (
+            <Text style={styles.resultText}>
+              {answer === correctWordId
+                ? 'Great job!'
+                : `Wrong! Correct answer: ${
+                    options.filter(word => word.id === correctWordId)[0].word
+                  }`}
+            </Text>
+          )}
+          <TouchableOpacity
+            style={[styles.button, answerButtonStyle]}
+            disabled={selected === null}
+            onPress={() => (selected ? setAnswer(selected.id) : null)}>
+            <Text style={[styles.buttonText, answerButtonTextStyle]}>
+              Continue
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -175,7 +234,6 @@ const styles = StyleSheet.create({
     height: '80%',
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
-    padding: 8,
   },
   title: {
     color: colors.text,
@@ -224,13 +282,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.4)',
     width: '80%',
     alignSelf: 'center',
-    position: 'absolute',
-    bottom: 80,
   },
   buttonText: {
     textAlign: 'center',
     textTransform: 'uppercase',
     color: colors.white,
     fontWeight: 'bold',
+  },
+  resultContainer: {
+    display: 'flex',
+    flex: 1,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    padding: 20,
+  },
+  resultText: {
+    color: colors.white,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    marginLeft: 40,
   },
 });
